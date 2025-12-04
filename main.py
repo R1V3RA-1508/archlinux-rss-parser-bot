@@ -1,5 +1,4 @@
 import feedparser
-from html_to_markdown import convert
 from datetime import datetime
 import logging
 import sys
@@ -50,25 +49,70 @@ class Database:
 
 class Parser:
     def __init__(self):
-        url = "https://archlinux.org/feeds/packages/added"  # "https://archlinux.org/feeds/news"
-        feed = feedparser.parse(url)
-        self.url = url
-        self.feed = feed
+        added_url = "https://archlinux.org/feeds/packages/added"
+        added_feed = feedparser.parse(added_url)
+        removed_url = "https://archlinux.org/feeds/packages/removed"
+        removed_feed = feedparser.parse(removed_url)
+        news_url = "https://archlinux.org/feeds/news"
+        news_feed = feedparser.parse(news_url)
+        self.added_url = added_url
+        self.added_feed = added_feed
+        self.removed_url = removed_url
+        self.removed_feed = removed_feed
+        self.news_url = news_url
+        self.news_feed = news_feed
         self.db = Database()
 
-    def get_news(self):
-        news_list = []
-        for i in self.feed.get("entries"):
+    def get_added(self):
+        added_list = []
+        for i in self.added_feed.get("entries"):
             if not self.db.check_news(i.id):
                 dt = datetime.strptime(i.published, "%a, %d %b %Y %H:%M:%S %z")
                 pubtime = datetime.strftime(dt, "%d.%m.%Y %H:%M %Z")
-                news_list.append(
+                added_list.append(
                     {
                         "title": i.title,
                         "summary": ekran(i.summary),
                         "category": i.category,
                         "pubtime": pubtime,
                         "link": i.link,
+                        "id": i.id,
+                    }
+                )
+                # self.db.commit_news(i.id)
+        return added_list
+
+    def get_removed(self):
+        removed_list = []
+        for i in self.removed_feed.get("entries"):
+            if not self.db.check_news(i.id):
+                dt = datetime.strptime(i.published, "%a, %d %b %Y %H:%M:%S %z")
+                pubtime = datetime.strftime(dt, "%d.%m.%Y %H:%M %Z")
+                removed_list.append(
+                    {
+                        "title": i.title,
+                        "summary": ekran(i.summary),
+                        "category": i.category,
+                        "pubtime": pubtime,
+                        "link": i.link,
+                        "id": i.id,
+                    }
+                )
+                # self.db.commit_news(i.id)
+        return removed_list
+
+    def get_news(self):
+        news_list = []
+        for i in self.news_feed.get("entries"):
+            if not self.db.check_news(i.id):
+                dt = datetime.strptime(i.published, "%a, %d %b %Y %H:%M:%S %z")
+                pubtime = datetime.strftime(dt, "%d.%m.%Y %H:%M %Z")
+                news_list.append(
+                    {
+                        "author": i.author,
+                        "title": i.title,
+                        "summary": ekran(i.summary),
+                        "pubtime": pubtime,
                         "id": i.id,
                     }
                 )
@@ -86,8 +130,8 @@ class BotS:
         self.bot = Bot(token=self.TOKEN)
         self.db = Database()
 
-    async def send(self):
-        news = self.parser.get_news()
+    async def fetch_packages(self):
+        news = self.parser.get_added()
         for n in news:
             await self.bot.send_message(
                 text=f"""
@@ -96,22 +140,67 @@ class BotS:
 {n.get("summary")}\n\n\
 Категория: <b>{n.get("category")}</b>\n\
 Ссылка: <a href="{n.get("link")}">*тык*</a>\n\
-Время публикации: {n.get("pubtime")}
+Время публикации: {n.get("pubtime")}\n\
+#added
+""",
+                chat_id=self.CHANNEL_ID,
+                parse_mode="HTML",
+            )
+            logging.debug("Отправлен пакет: " + n["title"])
+            self.db.commit_news(n["id"])
+            await asyncio.sleep(5)
+
+    async def fetch_removed(self):
+        news = self.parser.get_removed()
+        for n in news:
+            await self.bot.send_message(
+                text=f"""
+Удален пакет из AUR:\n\
+<b>{n.get("title")}</b>\n\n\
+{n.get("summary")}\n\n\
+Категория: <b>{n.get("category")}</b>\n\
+Ссылка: <a href="{n.get("link")}">*тык*</a>\n\
+Время публикации: {n.get("pubtime")}\n\
+#removed
+""",
+                chat_id=self.CHANNEL_ID,
+                parse_mode="HTML",
+            )
+            logging.debug("Отправлен удаленный пакет: " + n["title"])
+            self.db.commit_news(n["id"])
+            await asyncio.sleep(5)
+
+    async def fetch_news(self):
+        news = self.parser.get_news()
+        for n in news:
+            await self.bot.send_message(
+                text=f"""
+Новость от {n.get("author")}:\n\
+<b>{n.get("title")}</b>\n\n\
+{n.get("summary")}\n\n\
+Время публикации: {n.get("pubtime")}\n\
+#news
 """,
                 chat_id=self.CHANNEL_ID,
                 parse_mode="HTML",
             )
             logging.debug("Отправлена новость: " + n["title"])
             self.db.commit_news(n["id"])
-            await asyncio.sleep(3)
+            await asyncio.sleep(5)
+
+    async def send(self):
+        await self.fetch_news()
+        await self.fetch_packages()
+        await self.fetch_removed()
 
     async def periodic_sending(self):
         while True:
             try:
+                logging.debug("Проверяю RSS-ленты...")
                 await self.send()
             except Exception as e:
                 logging.error(f"Ошибка: {e}")
-            await asyncio.sleep(60)
+            await asyncio.sleep(300)
 
 
 async def main():
@@ -120,7 +209,7 @@ async def main():
     await bot_instance.dp.start_polling(bot_instance.bot)
     await bot_instance.send()
     while True:
-        await asyncio.sleep(300)
+        await asyncio.sleep(3600)
 
 
 if __name__ == "__main__":
