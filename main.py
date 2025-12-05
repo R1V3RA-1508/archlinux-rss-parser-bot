@@ -201,11 +201,10 @@ class BotS:
         while True:
             try:
                 logging.debug("Проверяю RSS-ленты...")
-                await self.bot.send_message(text="Бот работает", chat_id=2110265968)
                 await self.send()
             except Exception as e:
                 logging.error(f"Ошибка: {e}")
-            await asyncio.sleep(300)
+            await asyncio.sleep(600)
 
 
 async def main():
