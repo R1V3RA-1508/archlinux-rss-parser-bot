@@ -55,14 +55,12 @@ tag:archlinux.org,2025-12-04:/packages/extra-testing/x86_64/vokoscreen/202512041
 tag:archlinux.org,2025-12-04:/packages/multilib-testing/x86_64/lib32-libcups/202512041130
 tag:archlinux.org,2025-11-06:/news/waydroid-154-3-update-may-require-manual-intervention/
 tag:archlinux.org,2025-10-31:/news/dovecot-24-requires-manual-intervention/
-tag:archlinux.org,2025-08-21:/news/recent-services-outages/
 tag:archlinux.org,2025-08-04:/news/zabbix-741-2-may-requires-manual-intervention/
 tag:archlinux.org,2025-06-21:/news/linux-firmware-2025061312fe085f-5-upgrade-requires-manual-intervention/
 tag:archlinux.org,2025-06-20:/news/plasma-640-will-need-manual-intervention-if-you-are-on-x11/
 tag:archlinux.org,2025-06-16:/news/transition-to-the-new-wow64-wine-and-wine-staging/
 tag:archlinux.org,2025-04-17:/news/valkey-to-replace-redis-in-the-extra-repository/
 tag:archlinux.org,2025-02-17:/news/cleaning-up-old-repositories/
-tag:archlinux.org,2025-02-03:/news/glibc-241-corrupting-discord-installation/
 tag:archlinux.org,2025-12-04:/packages/multilib-testing/x86_64/lib32-libcups/202512041303
 tag:archlinux.org,2025-12-04:/packages/extra-testing/x86_64/xorg-xkbcomp/202512041302
 tag:archlinux.org,2025-12-04:/packages/extra-testing/x86_64/cups/202512041302
@@ -113,3 +111,5 @@ tag:archlinux.org,2025-12-02:/packages/extra-testing/x86_64/python-pytables/2025
 tag:archlinux.org,2025-12-02:/packages/core-testing/x86_64/grub/202512020830
 tag:archlinux.org,2025-12-02:/packages/extra-testing/x86_64/hyprland/202512020826
 tag:archlinux.org,2025-12-02:/packages/extra-testing/x86_64/hyprland-guiutils/202512020826
+tag:archlinux.org,2025-08-21:/news/recent-services-outages/
+tag:archlinux.org,2025-02-03:/news/glibc-241-corrupting-discord-installation/

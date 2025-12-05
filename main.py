@@ -8,6 +8,8 @@ from os import getenv
 
 from aiogram import Bot, Dispatcher
 
+from translate import Translator
+
 
 def ekran(string):
     new = (
@@ -125,6 +127,7 @@ class BotS:
         load_dotenv()
         self.TOKEN = getenv("token")
         self.CHANNEL_ID = getenv("channel_id")
+        self.EMAIL = getenv("email")
         self.dp = Dispatcher()
         self.parser = Parser()
         self.bot = Bot(token=self.TOKEN)
@@ -172,12 +175,13 @@ class BotS:
 
     async def fetch_news(self):
         news = self.parser.get_news()
+        translator = Translator(from_lang="en", to_lang="ru", email=self.EMAIL)
         for n in news:
             await self.bot.send_message(
                 text=f"""
 Новость от {n.get("author")}:\n\
-<b>{n.get("title")}</b>\n\n\
-{n.get("summary")}\n\n\
+<b>{translator.translate(n.get("title"))}</b>\n\n\
+{translator.translate(n.get("summary"))}\n\n\
 Время публикации: {n.get("pubtime")}\n\
 #news
 """,
