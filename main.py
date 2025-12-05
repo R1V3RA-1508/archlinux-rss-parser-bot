@@ -133,6 +133,10 @@ class BotS:
         self.bot = Bot(token=self.TOKEN)
         self.db = Database()
 
+        @self.dp.message()
+        async def start(message):
+            await message.answer("✅ Бот работает")
+
     async def fetch_packages(self):
         news = self.parser.get_added()
         for n in news:
